@@ -1,8 +1,8 @@
-import requests
-import subprocess
-import os
 import json
+import os
+import subprocess
 import time
+import urllib.request
 
 
 class run_shell:
@@ -64,8 +64,11 @@ def get_dict(urls, qe):
         while True:
             url = urls.replace(r"program", r"api/programs") + r"/talks" + f"?_p={qe.co}"
             print(qe.co, url)
-            a = requests.get(url)
-            minilist = json.loads(a.text)
+            a = urllib.request.Request(url)
+            with urllib.request.urlopen(a) as res:
+                a = res.read()
+
+            minilist = json.loads(a)
             if len(minilist) == 0:
                 break
             playlist.extend(minilist)
@@ -74,8 +77,10 @@ def get_dict(urls, qe):
         return playlist
     else:
         url = urls.replace(r"talk/", r"api/talks/")
-        a = requests.get(url)
-        return [json.loads(a.text)]
+        a = urllib.request.Request(url)
+        with urllib.request.urlopen(a) as res:
+            a = res.read()
+        return [json.loads(a)]
 
 
 def make_audiodata(metadata):
@@ -109,5 +114,3 @@ print(len(metadata), metadata)
 for i in metadata:
     make_audiodata(i)
     time.sleep(1)
-# imageUrl = metadata["audioFileUrl"]
-# download_data(metadata["audioFileUrl"], metadata["imageUrl"])
