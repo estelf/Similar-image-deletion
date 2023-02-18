@@ -94,11 +94,13 @@ def make_audiodata(metadata):
     radioid = metadata["id"]
     tem = createdAt.split(" ")[0]
     nen = tem.split("-")[0]
+    tempfile = os.path.join(os.path.dirname(__file__), "ffmpeg")
     run_shell.run(f"curl.exe -o post_audio.m4a {audioFileUrl}")
-    run_shell.run("ffmpeg\\ffmpeg.exe -i  post_audio.m4a temp.mp3")
+    print(f'"{tempfile}\\ffmpeg.exe" -i  post_audio.m4a temp.mp3')
+    run_shell.run(f'"{tempfile}\\ffmpeg.exe" -i  post_audio.m4a temp.mp3')
     run_shell.run(f"curl.exe -o cover.jpg {imageUrl}")
     run_shell.run(
-        "ffmpeg\\ffmpeg.exe -i temp.mp3 -i cover.jpg -map 0:a -map 1:v -c copy -disposition:1 attached_pic -id3v2_version 3 "
+        f'"{tempfile}\\ffmpeg.exe" -i temp.mp3 -i cover.jpg -map 0:a -map 1:v -c copy -disposition:1 attached_pic -id3v2_version 3 '
         f'-metadata album="{programTitle}" -metadata date={nen} -metadata title="{title}" -metadata comment="{description}" -metadata genre="Radio" -metadata publisher="Radiotalk" [{programTitle}][{tem}]{title}_{radioid}.mp3'
     )
     os.remove("post_audio.m4a")
