@@ -2,7 +2,6 @@ import requests
 import subprocess
 import os
 import json
-import io
 import time
 
 
@@ -87,7 +86,7 @@ def make_audiodata(metadata):
     createdAt = metadata["createdAt"]
     programTitle = metadata["programTitle"]
     description = metadata["description"].replace("\n", "")
-
+    radioid = metadata["id"]
     tem = createdAt.split(" ")[0]
     nen = tem.split("-")[0]
     run_shell.run(f"curl.exe -o post_audio.m4a {audioFileUrl}")
@@ -95,7 +94,7 @@ def make_audiodata(metadata):
     run_shell.run(f"curl.exe -o cover.jpg {imageUrl}")
     run_shell.run(
         "ffmpeg\\ffmpeg.exe -i temp.mp3 -i cover.jpg -map 0:a -map 1:v -c copy -disposition:1 attached_pic -id3v2_version 3 "
-        f'-metadata album="{programTitle}" -metadata date={nen} -metadata title="{title}" -metadata comment="{description}" -metadata genre="Radio" -metadata publisher="Radiotalk" [{programTitle}][{tem}]{title}.mp3'
+        f'-metadata album="{programTitle}" -metadata date={nen} -metadata title="{title}" -metadata comment="{description}" -metadata genre="Radio" -metadata publisher="Radiotalk" [{programTitle}][{tem}]{title}_{radioid}.mp3'
     )
     os.remove("post_audio.m4a")
     os.remove("temp.mp3")
