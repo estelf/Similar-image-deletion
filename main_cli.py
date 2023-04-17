@@ -3,6 +3,7 @@ import os
 import subprocess
 import time
 import urllib.request
+import argparse
 
 
 class run_shell:
@@ -63,7 +64,7 @@ def get_dict(urls, qe):
         playlist = []
         while True:
             url = urls.replace(r"program", r"api/programs") + r"/talks" + f"?_p={qe.co}"
-            print(qe.co, url)
+            # print(qe.co, url)
             a = urllib.request.Request(url)
             with urllib.request.urlopen(a) as res:
                 a = res.read()
@@ -94,25 +95,36 @@ def make_audiodata(metadata):
     radioid = metadata["id"]
     tem = createdAt.split(" ")[0]
     nen = tem.split("-")[0]
-    tempfile = os.path.join(os.path.dirname(__file__), "ffmpeg")
+    # tempfile = os.path.join(os.path.dirname(__file__), "ffmpeg")
+    # print(f"curl.exe -o post_audio.m4a {audioFileUrl}")
     run_shell.run(f"curl.exe -o post_audio.m4a {audioFileUrl}")
-    print(f'"{tempfile}\\ffmpeg.exe" -i  post_audio.m4a temp.mp3')
-    run_shell.run(f'"{tempfile}\\ffmpeg.exe" -i  post_audio.m4a temp.mp3')
+    # print(f"ffmpeg.exe -i  post_audio.m4a temp.mp3")
+    run_shell.run(f"ffmpeg.exe -i  post_audio.m4a temp.mp3")
     run_shell.run(f"curl.exe -o cover.jpg {imageUrl}")
     run_shell.run(
-        f'"{tempfile}\\ffmpeg.exe" -i temp.mp3 -i cover.jpg -map 0:a -map 1:v -c copy -disposition:1 attached_pic -id3v2_version 3 '
-        f'-metadata album="{programTitle}" -metadata date={nen} -metadata title="{title}" -metadata comment="{description}" -metadata genre="Radio" -metadata publisher="Radiotalk" [{programTitle}][{tem}]{title}_{radioid}.mp3'
+        f'"ffmpeg.exe" -i temp.mp3 -i cover.jpg -map 0:a -map 1:v -c copy -disposition:1 attached_pic -id3v2_version 3 '
+        f'-metadata album="{programTitle}" -metadata date={nen} -metadata title="{title}" -metadata comment="{description}"'
+        f' -metadata genre="Radio" -metadata publisher="Radiotalk" [{programTitle}][{tem}]{title}_{radioid}.mp3'
     )
     os.remove("post_audio.m4a")
     os.remove("temp.mp3")
     os.remove("cover.jpg")
 
 
-url = input("番組URL or ラジオURL>>")
-# url = r"https://radiotalk.jp/program/32332"
+parser = argparse.ArgumentParser(
+    description="""radiotalkからラジオデータをダウンロードするプログラムです。
+ラジオ単体だけでなく番組単位でのダウンロードもできます。
+また、ダウンロードしたデータをタグ付きMP3(カバーアートやタイトルなど)に変換されます。
+一部実行にffmpegを使用しています。"""
+)  # 2. パーサを作る
+parser.add_argument("URL", help="番組URL or ラジオURL")
 
+# url = input("番組URL or ラジオURL>>")
+# url = r"https://radiotalk.jp/program/32332"
+args = parser.parse_args()
+url = args.URL
 metadata = get_dict(url, Mycounter)
-print(len(metadata), metadata)
+# print(len(metadata), metadata)
 for i in metadata:
     make_audiodata(i)
     time.sleep(1)
